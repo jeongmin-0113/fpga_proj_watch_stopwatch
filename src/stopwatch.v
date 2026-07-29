@@ -1,70 +1,121 @@
 `timescale 1ns / 1ps
 
 module top_stopwatch (
-    input clk,
-    input reset,
-    input btn_L,  // runstop
-    input btn_R,  // clear
-    input btn_UP,  // mode
-    input [1:0] sw,
+    input        clk,
+    input        reset,
+    input        btn_L,     // runstop(s) / 자리변경(w) 
+    input        btn_R,     // clear(s) / 자리변경(w)
+    input        btn_UP,    // mode(s) / up(w)
+    input        btn_DOWN,  // option(s) / down(w)
+    input  [1:0] sw,        // sw[0]: 0-초:밀리초/1-시:분 sw[1]: 0-stopwatch/1-watch
     output [3:0] fnd_com,
     output [7:0] fnd_data,
-    output [1:0] led  // indicator
+    output [1:0] led        // indicator
 );
     // 아직 아무 기능이 없으니 일단 켜두기
     assign led = 2'b11;
 
-    // btn debounder -> control unit
-    wire w_btn_L, w_btn_R, w_btn_UP;
+    // btn debounder OUTPUT SIGNAL
+    wire w_btn_L, w_btn_R, w_btn_UP, w_btn_DOWN;
+    
     // control unit -> datapath
     wire w_runstop, w_clear, w_mode;
 
+    wire [1:0] w_state;
+
+    // 결정된 시간 데이터
     wire [6:0] w_msec;
     wire [5:0] w_sec, w_min;
     wire [4:0] w_hour;
 
-    btn_debouncer U_DB_RUNSTOP (
+    // stopwatch의 시간 데이터
+    wire [6:0] w_msec_stopwatch;
+    wire [5:0] w_sec_stopwatch, w_min_stopwatch;
+    wire [4:0] w_hour_stopwatch;
+
+    // watch의 시간 데이터
+    wire [6:0] w_msec_watch;
+    wire [5:0] w_sec_watch, w_min_watch;
+    wire [4:0] w_hour_watch;
+
+    assign w_msec = (sw[1]) ? w_msec_watch : w_msec_stopwatch;
+    assign w_sec  = (sw[1]) ? w_sec_watch : w_sec_stopwatch;
+    assign w_min  = (sw[1]) ? w_min_watch : w_min_stopwatch;
+    assign w_hour = (sw[1]) ? w_hour_watch : w_hour_stopwatch;
+
+    btn_debouncer U_DB_BTN_L (
         .clk  (clk),
         .reset(reset),
         .i_btn(btn_L),
         .o_btn(w_btn_L)
     );
 
-    btn_debouncer U_DB_CLEAR (
+    btn_debouncer U_DB_BTN_R (
         .clk  (clk),
         .reset(reset),
         .i_btn(btn_R),
         .o_btn(w_btn_R)
     );
 
-    btn_debouncer U_DB_MODE (
+    btn_debouncer U_DB_BTN_UP (
         .clk  (clk),
         .reset(reset),
         .i_btn(btn_UP),
         .o_btn(w_btn_UP)
     );
 
+    btn_debouncer U_DB_BTN_DOWN (
+        .clk  (clk),
+        .reset(reset),
+        .i_btn(btn_DOWN),
+        .o_btn(w_btn_DOWN)
+    );
+
+    // stopwatch control unit
     control_unit U_CNTL_UNIT (
         .clk      (clk),
         .reset    (reset),
-        .i_runstop(w_btn_L),
-        .i_clear  (w_btn_R),
-        .i_mode   (w_btn_UP),
+        .i_runstop(w_btn_L & !sw[1]),
+        .i_clear  (w_btn_R & !sw[1]),
+        .i_mode   (w_btn_UP & !sw[1]),
         .o_runstop(w_runstop),
         .o_clear  (w_clear),
         .o_mode   (w_mode)
     );
 
+    // stopwatch datapath
     stopwatch_datapath U_DATAPATH (
         .clk    (clk),
         .reset  (reset),
         .runstop(w_runstop),
         .clear  (w_clear),
         .mode   (w_mode),
-        .m_sec  (w_msec),
-        .sec    (w_sec),
-        .min    (w_min),
-        .hour   (w_hour)
+        .m_sec  (w_msec_stopwatch),
+        .sec    (w_sec_stopwatch),
+        .min    (w_min_stopwatch),
+        .hour   (w_hour_stopwatch)
+    );
+
+    // watch control unit
+    watch_control_unit U_CNTL_UNIT_WATCH (
+        .clk  (clk),
+        .reset(reset),
+        .btn_L(w_btn_L & sw[1]),
+        .btn_R(w_btn_R & sw[1]),
+        .state(w_state)
+    );
+
+    // watch datapath
+    watch_datapath U_DATAPATH_WATCH (
+        .clk  (clk),
+        .reset(reset),
+        .up   (w_btn_UP & sw[1]),
+        .down (w_btn_DOWN & sw[1]),
+        .state(w_state),
+        .msec(w_msec_watch),
+        .sec  (w_sec_watch),
+        .min  (w_min_watch),
+        .hour (w_hour_watch)
     );
 
     fnd_controller U_FND_CNTL (
