@@ -12,6 +12,8 @@ module fnd_controller #(
     input  [ SEC_WIDTH-1:0] sec,
     input  [ MIN_WIDTH-1:0] min,
     input  [HOUR_WIDTH-1:0] hour,
+    input [1:0] state,
+    input [1:0] sw,
     input                   display_mode,  // sw[0] -> 0=초/1=시간 선택
     output [           3:0] fnd_com,
     output [           7:0] fnd_data
@@ -22,6 +24,67 @@ module fnd_controller #(
     wire [2:0] w_digit_sel;
     wire clk_reg;
     wire w_dot_onoff;
+    wire [3:0] w_indi_msec_1, w_indi_msec_10, w_indi_sec_1, w_indi_sec_10, w_indi_min_1, w_indi_min_10, w_indi_hour_1, w_indi_hour_10;
+    wire [3:0] w_state_out;
+    wire indi_digit_1, indi_digit_10;
+
+    state_decoder U_STATE_DC (
+        .clk(clk),
+        .reset(reset),
+        .state(state),
+        .state_out(w_state_out)
+    );
+
+    indicator U_INDICATOR_MSEC (
+        .clk(clk),
+        .reset(reset),
+        .sw(sw),
+        .comp(w_dot_onoff),
+        .state(w_state_out[0]),
+        .digit_1(w_msec_1),
+        .digit_10(w_msec_10),
+        .indi_digit_1(w_indi_msec_1),
+        .indi_digit_10(w_indi_msec_10)
+    );
+
+    indicator U_INDICATOR_SEC (
+        .clk(clk),
+        .reset(reset),
+        .sw(sw),
+        .comp(w_dot_onoff),
+        .state(w_state_out[1]),
+        .digit_1(w_sec_1),
+        .digit_10(w_sec_10),
+        .indi_digit_1(w_indi_sec_1),
+        .indi_digit_10(w_indi_sec_10)
+    );
+
+
+    indicator U_INDICATOR_MIN (
+        .clk(clk),
+        .reset(reset),
+        .sw(sw),
+        .comp(w_dot_onoff),
+        .state(w_state_out[2]),
+        .digit_1(w_min_1),
+        .digit_10(w_min_10),
+        .indi_digit_1(w_indi_min_1),
+        .indi_digit_10(w_indi_min_10)
+    );
+
+
+    indicator U_INDICATOR_HOUR (
+        .clk(clk),
+        .reset(reset),
+        .sw(sw),
+        .comp(w_dot_onoff),
+        .state(w_state_out[3]),
+        .digit_1(w_hour_1),
+        .digit_10(w_hour_10),
+        .indi_digit_1(w_indi_hour_1),
+        .indi_digit_10(w_indi_hour_10)
+    );
+
 
     clk_div U_CLK_DIV (
         .clk(clk),
@@ -64,10 +127,10 @@ module fnd_controller #(
 
     // 8x1 mux - msec & sec display
     mux_8x1 U_MUX_SEC (
-        .in0(w_msec_1),
-        .in1(w_msec_10),
-        .in2(w_sec_1),
-        .in3(w_sec_10),
+        .in0(w_indi_msec_1),
+        .in1(w_indi_msec_10),
+        .in2(w_indi_sec_1),
+        .in3(w_indi_sec_10),
         .in4(4'hf),
         .in5(4'hf),
         .in6({3'b111, w_dot_onoff}),
@@ -95,10 +158,10 @@ module fnd_controller #(
 
     // mux 8x1 - min & hour display
     mux_8x1 U_MUX_HOUR (
-        .in0(w_min_1),  // sel 3'b000
-        .in1(w_min_10),  // sel 3'b001
-        .in2(w_hour_1),  // sel 3'b010
-        .in3(w_hour_10),  // sel 
+        .in0(w_indi_min_1),  // sel 3'b000
+        .in1(w_indi_min_10),  // sel 3'b001
+        .in2(w_indi_hour_1),  // sel 3'b010
+        .in3(w_indi_hour_10),  // sel 
         .in4(4'hf),
         .in5(4'hf),
         .in6({3'b111, w_dot_onoff}),
@@ -121,6 +184,51 @@ module fnd_controller #(
     );
 
 endmodule
+
+
+module state_decoder (
+    input clk,
+    input reset,
+    input [1:0] state,
+    output reg [3:0] state_out
+);
+    always @(state) begin
+        case (state)
+            2'b00:   state_out = 4'b0000;
+            2'b01:   state_out = 4'b1000;
+            2'b10:   state_out = 4'b0100;
+            2'b11:   state_out = 4'b0010;
+            default: state_out = 4'b0000;
+        endcase
+    end
+endmodule
+
+
+module indicator (
+    input clk,
+    input reset,
+    input [1:0] sw,
+    input comp,
+    input state,
+    input [3:0] digit_1,
+    input [3:0] digit_10,
+    output reg [3:0] indi_digit_1,
+    output reg [3:0] indi_digit_10
+);
+    always@(*)begin
+        if(comp && state) begin
+            indi_digit_1 = 4'hf;
+            indi_digit_10 = 4'hf;
+        end else begin
+            indi_digit_1 = digit_1;
+            indi_digit_10 = digit_10;
+        end
+    end
+    // assign indi_digit_1  = (sw[1] & !comp & state) ? 4'hf : digit_1;
+    // assign indi_digit_10 = (sw[1] & !comp & state) ? 4'hf : digit_10;
+
+endmodule
+
 
 module clk_div (
     input  clk,
