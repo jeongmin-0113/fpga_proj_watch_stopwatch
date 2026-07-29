@@ -28,6 +28,7 @@ module watch_control_unit (
 
     //next combination logic
     always @(*) begin
+        next_state = current_state;
         case (current_state)
             START:
             if (btn_R == 1) next_state = HOUR;
@@ -43,7 +44,7 @@ module watch_control_unit (
             SEC:
             if (btn_R == 1) next_state = START;
             else if (btn_L == 1) next_state = MIN;
-            default: next_state = current_state;
+            //default: 
         endcase
     end
 

@@ -1,27 +1,29 @@
 `timescale 1ns / 1ps
 
 module top_stopwatch (
-    input        clk,
-    input        reset,
-    input        btn_L,     // runstop(s) / 자리변경(w) 
-    input        btn_R,     // clear(s) / 자리변경(w)
-    input        btn_UP,    // mode(s) / up(w)
-    input        btn_DOWN,  // option(s) / down(w)
+    input clk,
+    input reset,
+    input btn_L,  // runstop(s) / 자리변경(w) 
+    input btn_R,  // clear(s) / 자리변경(w)
+    input btn_UP,  // mode(s) / up(w)
+    input btn_DOWN,  // option(s) / down(w)
     input  [1:0] sw,        // sw[0]: 0-초:밀리초/1-시:분 sw[1]: 0-stopwatch/1-watch
     output [3:0] fnd_com,
     output [7:0] fnd_data,
-    output [1:0] led        // indicator
+    output [1:0] led  // indicator
 );
     // 아직 아무 기능이 없으니 일단 켜두기
     assign led = 2'b11;
 
     // btn debounder OUTPUT SIGNAL
     wire w_btn_L, w_btn_R, w_btn_UP, w_btn_DOWN;
-    
+
     // control unit -> datapath
     wire w_runstop, w_clear, w_mode;
 
+
     wire [1:0] w_state;
+    wire [1:0] w_fnd_state;
 
     // 결정된 시간 데이터
     wire [6:0] w_msec;
@@ -39,9 +41,11 @@ module top_stopwatch (
     wire [4:0] w_hour_watch;
 
     assign w_msec = (sw[1]) ? w_msec_watch : w_msec_stopwatch;
-    assign w_sec  = (sw[1]) ? w_sec_watch : w_sec_stopwatch;
-    assign w_min  = (sw[1]) ? w_min_watch : w_min_stopwatch;
+    assign w_sec = (sw[1]) ? w_sec_watch : w_sec_stopwatch;
+    assign w_min = (sw[1]) ? w_min_watch : w_min_stopwatch;
     assign w_hour = (sw[1]) ? w_hour_watch : w_hour_stopwatch;
+
+    assign w_fnd_state = (sw[1]) ? w_state : 2'b00;
 
     btn_debouncer U_DB_BTN_L (
         .clk  (clk),
@@ -125,6 +129,8 @@ module top_stopwatch (
         .sec(w_sec),
         .min(w_min),
         .hour(w_hour),
+        .state(w_fnd_state),
+        .sw(sw),
         .display_mode(sw[0]),  // sw[0] -> 0=초/1=시간 선택
         .fnd_com(fnd_com),
         .fnd_data(fnd_data)

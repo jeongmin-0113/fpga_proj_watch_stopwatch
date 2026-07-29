@@ -3,10 +3,10 @@
 module control_unit (
     input  clk,
     input  reset,
-    input  i_run_stop,
+    input  i_runstop,
     input  i_clear,
     input  i_mode,
-    output o_run_stop,
+    output o_runstop,
     output o_clear,
     output o_mode
 );
@@ -17,13 +17,13 @@ module control_unit (
     reg run_stop_reg, run_stop_next, clear_reg, clear_next, mode_reg, mode_next;
 
     //output
-    //assign {o_clear, o_run_stop, o_mode} = (c_state == STOP) ? 3'b000:
+    //assign {o_clear, o_runstop, o_mode} = (c_state == STOP) ? 3'b000:
     //                                        (c_state === RUN) ? 3'b010:
     //                                        (c_state == CLEAR) ? 3'b100:
     //                                        (c_state == MODE) ? 3'b000: 3'b000;
     // assign문을 always로 바꾸기
 
-    assign o_run_stop = run_stop_reg;
+    assign o_runstop = run_stop_reg;
     assign o_clear = clear_reg;
     assign o_mode = mode_reg;
 
@@ -45,7 +45,7 @@ module control_unit (
     //next CL 
     always @(*) begin
         n_state = c_state;
-        run_stop_next= run_stop_reg;
+        run_stop_next = run_stop_reg;
         clear_next = clear_reg;
         mode_next = mode_reg;
         case (c_state)
@@ -53,14 +53,14 @@ module control_unit (
                 //moore output
                 run_stop_next = 1'b0;
                 clear_next = 1'b0;
-                if (i_run_stop) n_state = RUN;
+                if (i_runstop) n_state = RUN;
                 else if (i_clear) n_state = CLEAR;
                 else if (i_mode) n_state = MODE;
                 else n_state = c_state;
             end
             RUN: begin
                 run_stop_next = 1'b1;
-                if (i_run_stop) begin
+                if (i_runstop) begin
                     n_state = STOP;
                 end
             end
@@ -70,7 +70,7 @@ module control_unit (
             end
             MODE: begin
                 mode_next = ~mode_reg;
-                n_state = STOP;
+                n_state   = STOP;
             end
         endcase
     end
