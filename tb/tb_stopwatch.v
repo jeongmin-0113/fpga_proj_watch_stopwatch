@@ -135,6 +135,9 @@ module tb_fnd_controller ();
     parameter TICK_DELAY = 1_000_000 * 10;
 
     reg clk, reset;
+    reg display_mode;
+    reg [1:0] sw;
+    reg [1:0] state;
     reg mode, runstop, clear;
     wire [6:0] msec;
     wire [5:0] sec;
@@ -142,6 +145,7 @@ module tb_fnd_controller ();
     wire [4:0] hour;
     wire [3:0] fnd_com;
     wire [7:0] fnd_data;
+    wire [3:0] state_out;
 
     stopwatch_datapath dut (
         .clk(clk),
@@ -162,6 +166,8 @@ module tb_fnd_controller ();
         .sec(sec),
         .min(min),
         .hour(hour),
+        .state(state),
+        .sw(sw),
         .display_mode(0),  // sw[0] -> 0=초/1=시간 선택
         .fnd_com(fnd_com),
         .fnd_data(fnd_data)
@@ -173,13 +179,21 @@ module tb_fnd_controller ();
     initial begin
         clk = 0;
         reset = 1;
-        mode = 0;
         runstop = 1;
         clear = 0;
-        #10;
-        reset = 0;
+        mode = 0;
+        state = 2'b01;
+        sw = 2'b10;
+        #10 reset = 0;
+        
 
-        #(TICK_DELAY * 10);
+        display_mode = 0;
+        #TICK_DELAY;
+
+        display_mode = 1;
+        #TICK_DELAY
+         
+        
         $stop;
     end
 endmodule
