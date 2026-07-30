@@ -21,6 +21,10 @@ module top_stopwatch (
     // control unit -> datapath
     wire w_runstop, w_clear, w_mode;
 
+    //12시간제 추가
+    wire w_format12;
+    reg [4:0] w_hour_display;
+
 
     wire [1:0] w_state;
     wire [1:0] w_fnd_state;
@@ -41,9 +45,23 @@ module top_stopwatch (
     wire [4:0] w_hour_watch;
 
     assign w_msec = (sw[1]) ? w_msec_watch : w_msec_stopwatch;
-    assign w_sec = (sw[1]) ? w_sec_watch : w_sec_stopwatch;
-    assign w_min = (sw[1]) ? w_min_watch : w_min_stopwatch;
-    assign w_hour = (sw[1]) ? w_hour_watch : w_hour_stopwatch;
+    assign w_sec  = (sw[1]) ? w_sec_watch : w_sec_stopwatch;
+    assign w_min  = (sw[1]) ? w_min_watch : w_min_stopwatch;
+
+    //12시간 변환
+    always @(*) begin
+        if (w_format12) begin
+            if (w_hour_stopwatch > 12) w_hour_display = w_hour_stopwatch - 12;
+            else w_hour_display = w_hour_stopwatch;
+        end else begin
+            w_hour_display = w_hour_stopwatch;
+        end
+    end
+
+    assign w_hour = (sw[1]) ? w_hour_watch : w_hour_display;
+
+    //기존코드
+    // assign w_hour = (sw[1]) ? w_hour_watch : w_hour_stopwatch;
 
     assign w_fnd_state = (sw[1]) ? w_state : 2'b00;
 
@@ -77,14 +95,16 @@ module top_stopwatch (
 
     // stopwatch control unit
     control_unit U_CNTL_UNIT (
-        .clk      (clk),
-        .reset    (reset),
-        .i_runstop(w_btn_L & !sw[1]),
-        .i_clear  (w_btn_R & !sw[1]),
-        .i_mode   (w_btn_UP & !sw[1]),
-        .o_runstop(w_runstop),
-        .o_clear  (w_clear),
-        .o_mode   (w_mode)
+        .clk       (clk),
+        .reset     (reset),
+        .i_runstop (w_btn_L & !sw[1]),
+        .i_clear   (w_btn_R & !sw[1]),
+        .i_mode    (w_btn_UP & !sw[1]),
+        .i_format12(w_btn_DOWN & !sw[1]),  //12시간제 추가
+        .o_runstop (w_runstop),
+        .o_clear   (w_clear),
+        .o_mode    (w_mode),
+        .o_format12(w_format12)            //12시간제 추가
     );
 
     // stopwatch datapath
