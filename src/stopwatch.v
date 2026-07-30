@@ -7,7 +7,7 @@ module top_stopwatch (
     input btn_R,  // clear(s) / 자리변경(w)
     input btn_UP,  // mode(s) / up(w)
     input btn_DOWN,  // option(s) / down(w)
-    input  [1:0] sw,        // sw[0]: 0-초:밀리초/1-시:분 sw[1]: 0-stopwatch/1-watch
+    input  [2:0] sw,        // sw[0]: 0-초:밀리초/1-시:분 sw[1]: 0-stopwatch/1-watch, sw[2] : watch의 12시간제
     output [3:0] fnd_com,
     output [7:0] fnd_data,
     output [1:0] led  // indicator
@@ -20,7 +20,6 @@ module top_stopwatch (
 
     // control unit -> datapath
     wire w_runstop, w_clear, w_mode;
-
 
     wire [1:0] w_state;
     wire [1:0] w_fnd_state;
@@ -40,10 +39,25 @@ module top_stopwatch (
     wire [5:0] w_sec_watch, w_min_watch;
     wire [4:0] w_hour_watch;
 
+    // watch의 12시간제
+    wire w_format12_watch;
+    reg [4:0] w_hour_display_watch;
+    assign w_format12_watch = sw[2];
+
+    always @(*) begin
+        w_hour_display_watch = w_hour_watch; //sw[2] = 0이면 원래 24시간제
+        if (w_format12_watch) begin  //12시간제 스위치 키면
+            if (w_hour_watch > 12) w_hour_display_watch = w_hour_watch - 12; //13~23을 1~11로
+            else if (w_hour_watch == 0) w_hour_display_watch = 12; //00시를 12시로
+        end
+    end
+
     assign w_msec = (sw[1]) ? w_msec_watch : w_msec_stopwatch;
     assign w_sec = (sw[1]) ? w_sec_watch : w_sec_stopwatch;
     assign w_min = (sw[1]) ? w_min_watch : w_min_stopwatch;
-    assign w_hour = (sw[1]) ? w_hour_watch : w_hour_stopwatch;
+
+    // watch일 땐 12시간제, stopwatch는 w_hour_stopwatch로
+    assign w_hour = (sw[1]) ? w_hour_display_watch : w_hour_stopwatch;
 
     assign w_fnd_state = (sw[1]) ? w_state : 2'b00;
 
@@ -130,7 +144,7 @@ module top_stopwatch (
         .min(w_min),
         .hour(w_hour),
         .state(w_fnd_state),
-        .sw(sw),
+        .sw(sw[1:0]),
         .display_mode(sw[0]),  // sw[0] -> 0=초/1=시간 선택
         .fnd_com(fnd_com),
         .fnd_data(fnd_data)

@@ -9,6 +9,7 @@ module control_unit (
     output o_runstop,
     output o_clear,
     output o_mode
+
 );
     parameter STOP = 0, RUN = 1, CLEAR = 2, MODE = 3;
 
