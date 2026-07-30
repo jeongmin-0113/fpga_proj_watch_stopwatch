@@ -4,7 +4,7 @@ module tb_watch_and_stopwatch_top ();
 
     reg clk, reset;
     reg btn_L, btn_R, btn_UP, btn_DOWN;
-    reg  [1:0] sw;
+    reg  [2:0] sw;
 
     wire [3:0] fnd_com;
     wire [7:0] fnd_data;
@@ -33,12 +33,13 @@ module tb_watch_and_stopwatch_top ();
         btn_R = 0;
         btn_UP = 0;
         btn_DOWN = 0;
-        sw = 2'b00;
+        sw = 3'b000;
         #10;
         reset = 0;
-
+        
+        //stopwatch모드
         #(TICK_DELAY*5);
-        btn_L = 1;
+        btn_L = 1; //start
         #(10_000);
         btn_L = 0;
 
@@ -63,45 +64,55 @@ module tb_watch_and_stopwatch_top ();
         // btn_R = 1;
         // #10;
         // btn_R = 0;
-
+        
+        //watch모드
         #(TICK_DELAY * 10);
-        sw = 2'b10;
+        sw = 3'b010;
+        #100;
 
         #6;
-        btn_L = 1;
-        #(10_000);
-        btn_L = 0;
-
-        #6;
-        btn_UP = 1;
-        #(10_000);
-        btn_UP = 0;
-
-        #(TICK_DELAY);
-
-        #6;
-        btn_L = 1;
-        #(10_000);
-        btn_L = 0;
-
-        #6;
-        btn_UP = 1;
-        #(10_000);
-        btn_UP = 0;
-
-        #(TICK_DELAY);
-
-        #6;
-        btn_R = 1;
+        btn_R = 1; //hour
         #(10_000);
         btn_R = 0;
 
         #6;
-        btn_UP = 1;
+        btn_UP = 1;  //hour증가
         #(10_000);
         btn_UP = 0;
 
-        #(TICK_DELAY * 10);
+        #(TICK_DELAY*2);
+        
+        //12시간제
+        sw = 3'b110;
+        #(TICK_DELAY*2);
+        //24시간제
+        sw = 3'b010;
+        #(TICK_DELAY*2);
+
+
+        // #6;
+        // btn_L = 1;
+        // #(10_000);
+        // btn_L = 0;
+
+        // #6;
+        // btn_UP = 1;
+        // #(10_000);
+        // btn_UP = 0;
+
+        // #(TICK_DELAY);
+
+        // #6;
+        // btn_R = 1;
+        // #(10_000);
+        // btn_R = 0;
+
+        // #6;
+        // btn_UP = 1;
+        // #(10_000);
+        // btn_UP = 0;
+
+        // #(TICK_DELAY * 10);
 
         $stop;
     end
