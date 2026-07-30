@@ -6,11 +6,9 @@ module control_unit (
     input  i_runstop,
     input  i_clear,
     input  i_mode,
-    input  i_format12,  //12시간제 입력 추가
     output o_runstop,
     output o_clear,
-    output o_mode,
-    output o_format12   //12시간제 출력 추가
+    output o_mode
 
 );
     parameter STOP = 0, RUN = 1, CLEAR = 2, MODE = 3;
@@ -18,7 +16,6 @@ module control_unit (
     reg [1:0] c_state, n_state;
     //reg는 current, next는 next, 출력도 피드백구조로 만들기
     reg run_stop_reg, run_stop_next, clear_reg, clear_next, mode_reg, mode_next;
-    reg format12_reg, format12_next;  //12시간제 현재값, 다음값 추가
 
     //output
     //assign {o_clear, o_runstop, o_mode} = (c_state == STOP) ? 3'b000:
@@ -30,7 +27,6 @@ module control_unit (
     assign o_runstop = run_stop_reg;
     assign o_clear = clear_reg;
     assign o_mode = mode_reg;
-    assign o_format12 = format12_reg;  //12시간제 연결추가
 
     //state register
     always @(posedge clk, posedge reset) begin
@@ -39,13 +35,11 @@ module control_unit (
             run_stop_reg <= 1'b0;
             clear_reg <= 1'b0;
             mode_reg <= 1'b0;
-            format12_reg <= 1'b0;  //12시간제
         end else begin
             c_state <= n_state;
             run_stop_reg <= run_stop_next;
             clear_reg <= clear_next;
             mode_reg <= mode_next;
-            format12_reg <= format12_next;  //12시간제
         end
     end
 
@@ -80,12 +74,6 @@ module control_unit (
                 n_state   = STOP;
             end
         endcase
-    end
-
-    //12시간제는 state랑 상관없이 누르면 언제든 동작하게
-    always @(*) begin
-        format12_next = format12_reg;
-        if (i_format12) format12_next = ~format12_reg;
     end
 
 endmodule
