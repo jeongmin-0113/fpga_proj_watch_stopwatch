@@ -6,16 +6,21 @@ module control_unit (
     input  i_runstop,
     input  i_clear,
     input  i_mode,
+    input  i_save_load, // btn down
+    input i_is_data_saved, // datapath에 데이터 저장되어 있는지 t/f 
     output o_runstop,
     output o_clear,
-    output o_mode
+    output o_mode,
+    output o_save, // data save trigger signal
+    output o_load  // data load trigger signal
 
 );
-    parameter STOP = 0, RUN = 1, CLEAR = 2, MODE = 3;
+    parameter STOP = 3'b000, RUN = 3'b001, CLEAR = 3'b010, MODE = 3'b011, SAVE = 3'b100, LOAD = 3'b001;
 
-    reg [1:0] c_state, n_state;
+    reg [2:0] c_state, n_state;
     //reg는 current, next는 next, 출력도 피드백구조로 만들기
-    reg run_stop_reg, run_stop_next, clear_reg, clear_next, mode_reg, mode_next;
+    reg run_stop_reg, clear_reg, mode_reg, save_reg, load_reg;
+    reg run_stop_next, clear_next, mode_next, save_next, load_next;
 
     //output
     //assign {o_clear, o_runstop, o_mode} = (c_state == STOP) ? 3'b000:
@@ -27,6 +32,8 @@ module control_unit (
     assign o_runstop = run_stop_reg;
     assign o_clear = clear_reg;
     assign o_mode = mode_reg;
+    assign o_save = save_reg;
+    assign o_load = load_reg;
 
     //state register
     always @(posedge clk, posedge reset) begin
@@ -35,11 +42,15 @@ module control_unit (
             run_stop_reg <= 1'b0;
             clear_reg <= 1'b0;
             mode_reg <= 1'b0;
+            save_reg <= 1'b0;
+            load_reg <= 1'b0;
         end else begin
             c_state <= n_state;
             run_stop_reg <= run_stop_next;
             clear_reg <= clear_next;
             mode_reg <= mode_next;
+            save_reg <= save_next;
+            load_reg <= load_next;
         end
     end
 
@@ -49,14 +60,20 @@ module control_unit (
         run_stop_next = run_stop_reg;
         clear_next = clear_reg;
         mode_next = mode_reg;
+        save_next = save_reg;
+        load_next = load_reg;
         case (c_state)
             STOP: begin
                 //moore output
                 run_stop_next = 1'b0;
                 clear_next = 1'b0;
+                load_next = 1'b0;
+                save_next = 1'b0;
                 if (i_runstop) n_state = RUN;
                 else if (i_clear) n_state = CLEAR;
                 else if (i_mode) n_state = MODE;
+                else if (i_save_load & !i_is_data_saved) n_state = SAVE;
+                else if (i_save_load & i_is_data_saved) n_state = LOAD;
                 else n_state = c_state;
             end
             RUN: begin
@@ -71,6 +88,14 @@ module control_unit (
             end
             MODE: begin
                 mode_next = ~mode_reg;
+                n_state   = STOP;
+            end
+            SAVE: begin
+                save_next = 1'b1;
+                n_state   = STOP;
+            end
+            LOAD: begin
+                load_next = 1'b1;
                 n_state   = STOP;
             end
         endcase
