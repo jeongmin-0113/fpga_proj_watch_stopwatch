@@ -10,17 +10,18 @@ module top_stopwatch (
     input  [2:0] sw,        // sw[0]: 0-초:밀리초/1-시:분 sw[1]: 0-stopwatch/1-watch, sw[2] : watch의 12시간제
     output [3:0] fnd_com,
     output [7:0] fnd_data,
-    output [1:0] led  // indicator
+    output led  // indicator
 );
-    // 아직 아무 기능이 없으니 일단 켜두기
-    assign led = 2'b11;
-
+    
     // btn debounder OUTPUT SIGNAL
     wire w_btn_L, w_btn_R, w_btn_UP, w_btn_DOWN;
 
     // control unit -> datapath
     wire w_runstop, w_clear, w_mode, w_save, w_load;
     wire w_is_data_saved;
+
+    // 값 저장 상태를 출력
+    assign led = w_is_data_saved;
 
     wire [1:0] w_state;
     wire [1:0] w_fnd_state;
