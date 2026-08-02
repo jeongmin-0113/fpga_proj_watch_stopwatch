@@ -48,13 +48,6 @@ module watch_control_unit (
         endcase
     end
 
-
-    //output combinational logic
-    always @(posedge clk or posedge reset) begin
-        if (reset == 1) current_state <= START;
-        else current_state <= next_state;
-    end
-
 endmodule
 
 
