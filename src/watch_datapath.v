@@ -72,7 +72,7 @@ module watch_datapath (
 
     watch_time_counter #(
         .COUNT_NUM(24),
-        .INIT_NUM(12)
+        .INIT_NUM (12)
     ) U_WATCH_COUNTER_HOUR (
         .clk(clk),
         .reset(reset),
@@ -94,10 +94,10 @@ module demux_1x3 (
 
     always @(*) begin
         case (sel)
-            2'b00: o_btn = 3'b000;                  // start = 모두 선택 안됨
-            2'b01: o_btn = {{i_btn}, 2'b00};        // hour = 시간 변경
-            2'b10: o_btn = {1'b0, {i_btn}, 1'b0};   // min = 분 변경
-            2'b11: o_btn = {2'b00, {i_btn}};        // sec = 초 변경
+            2'b00: o_btn = 3'b000;  // start = 모두 선택 안됨
+            2'b01: o_btn = {{i_btn}, 2'b00};  // hour = 시간 변경
+            2'b10: o_btn = {1'b0, {i_btn}, 1'b0};  // min = 분 변경
+            2'b11: o_btn = {2'b00, {i_btn}};  // sec = 초 변경
         endcase
     end
 
@@ -130,8 +130,14 @@ module watch_time_counter #(
             end else begin
                 o_tick <= 1'b0;
             end
-            if (i_up) time_cnt <= time_cnt + 1;
-            if (i_down) time_cnt <= time_cnt - 1;
+            if (i_up) begin
+                time_cnt <= time_cnt + 1;
+                if (time_cnt == COUNT_NUM - 1) time_cnt <= 0;
+            end
+            if (i_down) begin
+                time_cnt <= time_cnt - 1;
+                if (time_cnt == 0) time_cnt <= COUNT_NUM - 1;
+            end
         end
     end
 
