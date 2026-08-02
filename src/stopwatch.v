@@ -296,23 +296,6 @@ module time_counter #(
     output reg o_tick
 );
 
-    // always @(posedge clk, posedge reset) begin
-    //     if (reset) begin
-    //         time_cnt <= 0;
-    //         o_tick   <= 1'b0;
-    //     end else begin
-    //         if (i_tick) begin
-    //             time_cnt <= time_cnt + 1;
-    //             if (time_cnt == (COUNT_NUM - 1)) begin
-    //                 time_cnt <= 0;
-    //                 o_tick   <= 1'b1;
-    //             end
-    //         end else begin
-    //             o_tick <= 1'b0;
-    //         end
-    //     end
-    // end
-
     always @(posedge clk, posedge reset) begin
         if (reset | clear) begin
             time_cnt <= 0;

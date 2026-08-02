@@ -15,7 +15,7 @@ module control_unit (
     output o_load  // data load trigger signal
 
 );
-    parameter STOP = 3'b000, RUN = 3'b001, CLEAR = 3'b010, MODE = 3'b011, SAVE = 3'b100, LOAD = 3'b001;
+    parameter STOP = 3'b000, RUN = 3'b001, CLEAR = 3'b010, MODE = 3'b011, SAVE = 3'b100, LOAD = 3'b101;
 
     reg [2:0] c_state, n_state;
     //reg는 current, next는 next, 출력도 피드백구조로 만들기
