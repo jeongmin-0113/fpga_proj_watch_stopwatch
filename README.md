@@ -14,13 +14,14 @@
 > verified in simulation and on hardware.
 
 <!-- TODO: 보드 데모 GIF 삽입 -->
-![데모](images/demo.mp4)
+[![데모](images/demo.mp4)](https://github.com/user-attachments/assets/8f231c7d-fc8c-4c3b-8f23-577ee3c64acf)
 
 ---
 
 ## 1. 개요
 
 부트캠프 팀 프로젝트로, **스톱워치**와 **시계** 두 기능을 하나의 top module에 통합해 Basys3 보드에 구현했습니다.
+
 
 - 100 MHz 클럭을 100만 분주한 **10 ms tick**을 모든 시간 계산의 기준으로 사용
 - 파라미터화된 카운터 하나를 진법만 바꿔 재사용 → msec → sec → min → hour 자리올림 체인 구성
