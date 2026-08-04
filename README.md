@@ -14,7 +14,7 @@
 > verified in simulation and on hardware.
 
 <!-- TODO: 보드 데모 GIF 삽입 -->
-![데모](images/demo.mp4)
+![데모](images/demo.gif)
 
 ---
 
@@ -157,15 +157,16 @@ assign w_hour = (sw[1]) ? w_hour_display_watch : w_hour_stopwatch;
 
 ## 5. 검증
 
-각 모듈은 단위 테스트벤치로 검증한 뒤 top에 통합했습니다.
+검증은 두 계층으로 나눠 진행했습니다. 리프 모듈과 watch datapath는 해당 모듈을 직접 DUT로 삼아 단독 검증했고, **control unit은 top에 통합한 뒤 `top_stopwatch`를 DUT로 두고 디바운스된 버튼을 자극으로 사용해 검증**했습니다. control unit의 입력이 디바운서 출력이므로, 실제 신호 폭과 타이밍을 반영하려면 top 레벨에서 자극을 주는 편이 정확하다고 판단했습니다. 대신 파형 관찰은 계층 내부 신호(`c_state`, `n_state`, `o_runstop` 등)를 대상으로 했습니다.
 
-| 테스트벤치 | 대상 | 검증 시나리오 | 결과 |
-|---|---|---|---|
-| [`tb_tick_gen_100hz`](tb/tb_tick_gen_100hz.v) | tick 생성 | 999,999 clk 후 1펄스 발생, 주기 정확도 | Pass |
-| [`tb_stopwatch_control_unit`](tb/tb_stopwatch_control_unit.v) | stopwatch FSM | 유효 천이(STOP↔RUN, MODE 토글) / 무효 입력(RUN 중 save) 무시 | Pass |
-| [`tb_stopwatch_save_load`](tb/tb_stopwatch_save_load.v) | save/load | run → save → clear → load 시퀀스, `is_data_saved` 플래그 | Pass |
-| [`tb_watch_control_unit`](tb/tb_watch_control_unit.v) | watch FSM | 정·역방향 4상태 순환 | Pass |
-| [`tb_watch_datapath`](tb/tb_watch_datapath.v) | watch datapath | state별 up/down이 해당 자리에만 반영되는지 | Pass |
+| 테스트벤치 | DUT | 관찰 대상 | 검증 시나리오 | 결과 |
+|---|---|---|---|---|
+| [`tb_tick_gen_100hz`](tb/tb_tick_gen_100hz.v) | `tick_gen_100hz` | `o_tick` | 999,999 clk 후 1펄스 발생, 주기 정확도 | Pass |
+| [`tb_stopwatch_control_unit`](tb/tb_stopwatch_control_unit.v) | `top_stopwatch` | `control_unit` 내부 상태·출력 | 유효 천이(STOP↔RUN, MODE 토글) / 무효 입력(RUN 중 save) 무시 | Pass |
+| [`tb_stopwatch_save_load`](tb/tb_stopwatch_save_load.v) | `top_stopwatch` | `stopwatch_datapath` 저장 레지스터, `led` | run → save → clear → load 시퀀스, `is_data_saved` 플래그 | Pass |
+| [`tb_watch_control_unit`](tb/tb_watch_control_unit.v) | `top_stopwatch` | `state` | 정·역방향 4상태 순환 | Pass |
+| [`tb_watch_datapath`](tb/tb_watch_datapath.v) | `watch_datapath` | `hour`/`min`/`sec` | state별 up/down이 해당 자리에만 반영되는지 | Pass |
+
 
 **tick 생성 파형**
 
@@ -173,8 +174,11 @@ assign w_hour = (sw[1]) ? w_hour_display_watch : w_hour_stopwatch;
 
 **save / load 파형** — 디바운스된 `btn_DOWN`의 하강 엣지에 save가 반영되고 `led`가 점등, load 시 저장값으로 복원되며 소등됩니다.
 
-![save 파형](images/wave_save.png)
-![load 파형](images/wave_load.png)
+![save/load 파형](images/wave_save_load.png)
+
+**top 통합 파형** — `sw` 000 → 0(스톱워치) / 010 → 13(24시간제) / 110 → 1(12시간제) 전환 확인.
+
+![top 통합 파형](images/wave_top.png)
 
 ---
 
