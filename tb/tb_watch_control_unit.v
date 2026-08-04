@@ -22,20 +22,53 @@ module tb_watch_control_unit ();
     initial begin
         clk   = 0;
         reset = 1;
+        btn_R = 0;
+        btn_L = 0;
 
         #10 reset = 0;
+        
 
+        #5 btn_R = 1;
+        #10 
+        btn_R = 0;
+        #10
         btn_R = 1;
-        #10 btn_L = 1;
-        #10 btn_L = 0;
-        #10 btn_R = 1;
-        #10 btn_R = 0;
-        #10 btn_R = 1;
-        #10 btn_R = 0;
-        #10 btn_L = 1;
-        #10 btn_L = 0;
-        #10 btn_L = 1;
-        #10 btn_L = 0;
+
+        #10 
+        btn_R = 0;
+        #10
+        btn_R = 1;
+
+        #10
+        btn_R = 0;
+        #10
+        btn_R = 1;
+
+        #10
+        btn_R = 0;
+
+        btn_L = 1;
+        #10
+        btn_L = 0;
+        #10
+        btn_L = 1;
+         
+        #10
+        btn_L = 0;
+        #10
+        btn_L = 1;
+
+        #10
+        btn_L = 0;
+        #10
+        btn_L = 1;
+
+        #10
+        btn_L = 0;
+        #10
+        btn_L = 1;
+
+
         $stop;
 
 
