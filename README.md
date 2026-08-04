@@ -14,7 +14,7 @@
 > verified in simulation and on hardware.
 
 <!-- TODO: 보드 데모 GIF 삽입 -->
-![데모](images/demo.gif)
+![데모](images/demo.mp4)
 
 ---
 
@@ -174,12 +174,8 @@ assign w_hour = (sw[1]) ? w_hour_display_watch : w_hour_stopwatch;
 
 **save / load 파형** — 디바운스된 `btn_DOWN`의 하강 엣지에 save가 반영되고 `led`가 점등, load 시 저장값으로 복원되며 소등됩니다.
 
-![save/load 파형](images/wave_save_load.png)
-
-**top 통합 파형** — `sw` 000 → 0(스톱워치) / 010 → 13(24시간제) / 110 → 1(12시간제) 전환 확인.
-
-![top 통합 파형](images/wave_top.png)
-
+![save 파형](images/wave_save.png)
+![load 파형](images/wave_load.png)
 ---
 
 ## 6. 트러블슈팅
