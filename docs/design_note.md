@@ -36,15 +36,15 @@ stopwatch 모듈 + watch 모듈을 하나의 top module에 통합해 FPGA에 올
 
 ### top module 블럭도
 
-![topmodule.png](topmodule.png)
+![topmodule.png](images/topmodule.png)
 
 ### watch fsm 상태도
 
-![image.png](image.png)
+![image.png](images/image.png)
 
 ### stopwatch fsm 상태도
 
-![image.png](image%201.png)
+![image.png](images/image%201.png)
 
 ### 프로젝트 설명
 
@@ -77,9 +77,9 @@ stopwatch 모듈 + watch 모듈을 하나의 top module에 통합해 FPGA에 올
 
 ### 2-1. 최상위 블럭도
 
-![topmodule.png](topmodule.png)
+![topmodule.png](images/topmodule.png)
 
-![image.png](image%202.png)
+![image.png](images/image%202.png)
 
 ### 2-2. 모듈 계층 트리 (전체 구현 내용)
 
@@ -515,7 +515,7 @@ endmodule
 
 ### 5-2. STOPWATCH
 
-![image.png](image%201.png)
+![image.png](images/image%201.png)
 
 - 6개의 상태를 가지는 stopwatch를 구현
     - stop: 초기 상태이며 다른 state로 이동 가능한 유일한 상태
@@ -540,7 +540,7 @@ endmodule
 - **동작 개념(소스 전)**: 100MHz clk를 100만 번 세면 10ms → 그때 1클럭짜리 tick 1개. (watch도 이 모듈을 그대로 재사용)
 - **schematic**
 
-![image.png](image%203.png)
+![image.png](images/image%203.png)
 
 ```verilog
 module tick_gen_100hz (
@@ -586,18 +586,18 @@ module tb_tick_gen_100hz ();
 endmodule
 ```
 
-![image.png](image%204.png)
+![image.png](images/image%204.png)
 
 - 99만 9999 clk 후 다음 posedge에서 0으로 초기화되며 o_tick 1펄스 발생 확인.
 - 10ms + 5ns 지나야 1 tick인 이유
 
-![image.png](image%205.png)
+![image.png](images/image%205.png)
 
 - 첫 clk posedge가 5ns에 존재
 
 #### control_unit — stopwatch FSM (+ save/load 상태) — 박정민
 
-![image.png](image%201.png)
+![image.png](images/image%201.png)
 
 - **동작 개념**
     - STOP/RUN/CLEAR/MODE 기본 4상태에 SAVE/LOAD 추가
@@ -783,7 +783,7 @@ endmodule
 
 - 유효 루트 1 (stop→run)
 
-![image.png](image%206.png)
+![image.png](images/image%206.png)
 
 - button debouncer의 q reg가 ff가 되는 순간 1clk 동안 debounce 신호 생성
 - debounce 된 신호가 온 다음 clk posedge에 o_runstop을 1로 설정
@@ -791,7 +791,7 @@ endmodule
 - 다음 clk posedge에 c_state에 n_state 반영
 - 다음 clk posedge에 출력 (o_runstop)에 c_state 반영
 
-![image.png](image%207.png)
+![image.png](images/image%207.png)
 
 - stop(000) → mode(011) 도 i_mode (버튼 up debouncer 입력) 들어오면 n_state 반영
 - 다음 clk posedge에 c_state에 n_state 반영
@@ -799,7 +799,7 @@ endmodule
 
 - 유효하지 않은 동작
 
-![image.png](image%208.png)
+![image.png](images/image%208.png)
 
 - run 중인 상태에서 btn_DOWN 입력 들어와 i_save_load 1 됨
 - run(001)에서 save(100) 혹은 load(101)로 가는 루트가 fsm에 존재하지 않음
@@ -848,7 +848,7 @@ endmodule
 
 #### datapath(F/F) *(테스트 有)*
 
-![0F21C111-8793-46B2-930E-C0895C4AE76C.jpeg](0F21C111-8793-46B2-930E-C0895C4AE76C.jpeg)
+![0F21C111-8793-46B2-930E-C0895C4AE76C.jpeg](images/0F21C111-8793-46B2-930E-C0895C4AE76C.jpeg)
 
 - **동작 개념**
     - F/F에 현재 시간을 저장(save), 저장값을 카운터에 되돌림(load).
@@ -1062,13 +1062,13 @@ module tb_stopwatch_save_load ();
 endmodule
 ```
 
-![image.png](image%209.png)
+![image.png](images/image%209.png)
 
 - save 타이밍: debounce된 down 버튼 입력의 downedge에 save 반영
 - save 후 `is_data_saved` = 1 , led 점등
 - saved msec, sec에 데이터 저장 확인
 
-![image.png](image%2010.png)
+![image.png](images/image%2010.png)
 
 - load 타이밍: debounce된 down 버튼 입력의 downedge에 load 반영
 - load 후 is_data_saved = 0, led 꺼짐
@@ -1114,11 +1114,11 @@ endmodule
     
     ```
     
-    ![image.png](image%2011.png)
+    ![image.png](images/image%2011.png)
     
-    ![image.png](image%2012.png)
+    ![image.png](images/image%2012.png)
     
-    ![image.png](image%2013.png)
+    ![image.png](images/image%2013.png)
     
 
 ---
@@ -1129,7 +1129,7 @@ endmodule
 
 #### (a) watch_control_unit — 조정 대상 자리 FSM (방지윤) *(테스트 有)*
 
-![image.png](image.png)
+![image.png](images/image.png)
 
 | state | 값 | 의미 |
 | --- | --- | --- |
@@ -1272,11 +1272,11 @@ endmodule
 
 //시뮬 사진 고쳤어!
 
-![waveform_annotated.png](waveform_annotated.png)
+![waveform_annotated.png](images/waveform_annotated.png)
 
 #### 5-3-2.  watch datapath 모듈 설계 및 테스트벤치
 
-![496E8666-8ED1-46F7-A118-76A995E94543.jpeg](496E8666-8ED1-46F7-A118-76A995E94543.jpeg)
+![496E8666-8ED1-46F7-A118-76A995E94543.jpeg](images/496E8666-8ED1-46F7-A118-76A995E94543.jpeg)
 
 - tick_gen_100hz는 stopwatch에서 작성한 것을 그대로 재사용.
 
@@ -1342,7 +1342,7 @@ endmodule
     - HOUR 초기값 12(=12:00:00:00).
 - **블럭도/schematic**
 
-![496E8666-8ED1-46F7-A118-76A995E94543.jpeg](496E8666-8ED1-46F7-A118-76A995E94543.jpeg)
+![496E8666-8ED1-46F7-A118-76A995E94543.jpeg](images/496E8666-8ED1-46F7-A118-76A995E94543.jpeg)
 
 ```verilog
 module watch_datapath (
@@ -1404,17 +1404,17 @@ endmodule
 
 - 아직 top 미연결이라 debounce 안 된 버튼으로 테스트.
 
-![image.png](image%2014.png)
+![image.png](images/image%2014.png)
 
 - 초기화 상태 확인 12:00:00:00
 
-![image.png](image%2015.png)
+![image.png](images/image%2015.png)
 
 - up 버튼 입력이 clk posedge에 반영
 - state 01:  hour 변경 허용하는 state
 - hour 변경 state + up 버튼 입력 = hour 0 → 1
 
-![image.png](image%2016.png)
+![image.png](images/image%2016.png)
 
 - down 버튼 입력이 clk posedge에 반영
 - state 01: hour 변경 허용하는 state
@@ -1467,7 +1467,7 @@ endmodule
 
 #### (3) 조정 자리 점멸 — state_decoder + indicator (방지윤)
 
-![image.png](image%2017.png)
+![image.png](images/image%2017.png)
 
 - **동작 개념**: FSM의 2비트 state를 “어느 자리를 깜빡일지” 4비트로 바꾸고(state_decoder), 그 자리에 대해 comp 주기로 숫자↔︎꺼짐을 번갈아 출력(indicator). fnd_controller에 포트를 추가해 얹는다.
 
@@ -1546,7 +1546,7 @@ module tb_watch_and_stopwatch_top ();
 endmodule
 ```
 
-![image.png](image%2018.png)
+![image.png](images/image%2018.png)
 
 - sw 000→0 표시(stopwatch) / 010→13(watch 24시) / 110→1(watch 12시) / 010→13.
 - 조정 상태에서 해당 자리 50ms 점멸 확인.
@@ -1603,7 +1603,7 @@ parameter STOP = 3'b000, RUN = 3'b001, CLEAR = 3'b010, MODE = 3'b011, SAVE = 3'b
 - **to-be**: LOAD state 값 수정 `3'b101`  후 보드에서 정상 작동 검증
 - 변경 전 오류상황 시뮬레이션
 
-![unnamed.png](unnamed.png)
+![unnamed.png](images/unnamed.png)
 
 - down 버튼 입력으로 i_save_load 신호 1 → n_state 업데이트 STOP(000) → LOAD(001)로 업데이트
 - RUN , LOAD가 001 상태값을 공유하므로 case문에서 상단에 위치한 run이 먼저 채택 → runstop이 출력 (오류 동작)
@@ -1614,7 +1614,7 @@ parameter STOP = 3'b000, RUN = 3'b001, CLEAR = 3'b010, MODE = 3'b011, SAVE = 3'b
 
 - 변경 후 시뮬레이션
 
-![image.png](image%2019.png)
+![image.png](images/image%2019.png)
 
 - down 버튼 입력으로 i_save_load가 1 → n_state  STOP(000)에서 SAVE(100)으로 업데이트
 - 다음 clk posedge에 c_state = n_state 반영 → 반영 후 c_state SAVE(100)
