@@ -45,9 +45,4 @@ module tb_stopwatch_time_counter ();
         $finish;
     end
 
-
-
-
-
-
 endmodule
